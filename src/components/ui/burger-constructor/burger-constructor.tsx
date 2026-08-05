@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import {
   Button,
   ConstructorElement,
@@ -6,9 +6,11 @@ import {
 } from '@zlden/react-developer-burger-ui-components';
 import styles from './burger-constructor.module.css';
 import { BurgerConstructorUIProps } from './type';
-import { TConstructorIngredient } from '@utils-types';
-import { BurgerConstructorElement, Modal } from '@components';
-import { Preloader, OrderDetailsUI } from '@ui';
+import { TConstructorIngredient } from '../../../utils/types';
+import { BurgerConstructorElement } from '../../burger-constructor-element';
+import { Modal } from '../../modal/modal';
+import { OrderDetailsUI } from '../order-details';
+import { Preloader } from '../preloader';
 
 export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   constructorItems,

@@ -1,5 +1,5 @@
 import { FC, SyntheticEvent, useState } from 'react';
-import { LoginUI } from '@ui-pages';
+import { LoginUI } from '../../components/ui/pages/login/login';
 
 export const Login: FC = () => {
   const [email, setEmail] = useState('');

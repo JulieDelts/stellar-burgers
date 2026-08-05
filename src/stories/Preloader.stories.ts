@@ -1,4 +1,4 @@
-import { Preloader } from '@ui';
+import { Preloader } from '../components/ui/preloader';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {

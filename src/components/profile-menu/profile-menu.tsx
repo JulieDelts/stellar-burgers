@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ProfileMenuUI } from '@ui';
+import { ProfileMenuUI } from '../ui/profile-menu';
 
 export const ProfileMenu: FC = () => {
   const { pathname } = useLocation();

@@ -1,4 +1,4 @@
-import { BurgerConstructorUI } from '@ui';
+import { BurgerConstructorUI } from '../components/ui/burger-constructor';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {

@@ -3,7 +3,7 @@ import { Tab } from '@zlden/react-developer-burger-ui-components';
 
 import styles from './burger-ingredients.module.css';
 import { BurgerIngredientsUIProps } from './type';
-import { IngredientsCategory } from '@components';
+import { IngredientsCategory } from '../../ingredients-category';
 
 export const BurgerIngredientsUI: FC<BurgerIngredientsUIProps> = memo(
   ({

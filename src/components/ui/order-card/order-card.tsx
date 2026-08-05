@@ -8,7 +8,7 @@ import {
 import styles from './order-card.module.css';
 
 import { OrderCardUIProps } from './type';
-import { OrderStatus } from '@components';
+import { OrderStatus } from '../../order-status';
 
 export const OrderCardUI: FC<OrderCardUIProps> = memo(
   ({ orderInfo, maxIngredients, locationState }) => (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { OrderDetailsUI } from '@ui';
+import { OrderDetailsUI } from '../components/ui/order-details';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {

@@ -1,4 +1,4 @@
-import { TIngredient } from '@utils-types';
+import { TIngredient } from '../../utils/types';
 
 export type TIngredientsCategoryProps = {
   title: string;

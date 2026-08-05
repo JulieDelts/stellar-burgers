@@ -7,7 +7,7 @@ import {
 import styles from './order-info.module.css';
 
 import { OrderInfoUIProps } from './type';
-import { OrderStatus } from '@components';
+import { OrderStatus } from '../../order-status';
 
 export const OrderInfoUI: FC<OrderInfoUIProps> = memo(({ orderInfo }) => (
   <div className={styles.wrap}>

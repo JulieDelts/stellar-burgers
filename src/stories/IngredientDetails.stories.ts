@@ -1,4 +1,4 @@
-import { IngredientDetailsUI } from '@ui';
+import { IngredientDetailsUI } from '../components/ui/ingredient-details';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {
