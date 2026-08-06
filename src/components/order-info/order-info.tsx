@@ -4,14 +4,21 @@ import { useSelector } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '../../utils/types';
-import { selectIngredients, selectFeeds } from '../../services/selectors/data';
+import {
+  selectIngredients,
+  selectFeeds,
+  selectUserOrders
+} from '../../services/selectors/data';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams<{ number: string }>();
   const ingredients = useSelector(selectIngredients);
   const feeds = useSelector(selectFeeds);
+  const userOrders = useSelector(selectUserOrders);
 
-  const orderData = feeds.find((item) => item.number === Number(number));
+  const orderData =
+    userOrders.find((item) => item.number === Number(number)) ||
+    feeds.find((item) => item.number === Number(number));
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;

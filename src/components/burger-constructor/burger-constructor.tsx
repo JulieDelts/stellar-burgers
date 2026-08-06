@@ -1,11 +1,13 @@
 import { FC, useMemo } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { TConstructorIngredient } from '../../utils/types';
 import { BurgerConstructorUI } from '../ui/burger-constructor';
 import {
   selectConstructorItems,
   selectOrderRequest,
-  selectOrderModalData
+  selectOrderModalData,
+  selectIsAuthenticated
 } from '../../services/selectors/data';
 import {
   createOrder,
@@ -14,13 +16,23 @@ import {
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const constructorItems = useSelector(selectConstructorItems);
   const orderRequest = useSelector(selectOrderRequest);
   const orderModalData = useSelector(selectOrderModalData);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const onOrderClick = () => {
     if (!constructorItems.bun || orderRequest) return;
+    if (!isAuthenticated) {
+      navigate('/login', {
+        replace: true,
+        state: { from: location }
+      });
+      return;
+    }
 
     const ingredientsIds = [
       constructorItems.bun._id,

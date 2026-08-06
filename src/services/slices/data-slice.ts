@@ -2,11 +2,17 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   getIngredientsApi,
   getFeedsApi,
+  getOrdersApi,
   orderBurgerApi,
   getUserApi,
   updateUserApi,
-  TRegisterData
+  registerUserApi,
+  loginUserApi,
+  logoutApi,
+  TRegisterData,
+  TLoginData
 } from '../../utils/burger-api';
+import { deleteCookie, getCookie, setCookie } from '../../utils/cookie';
 import {
   TIngredient,
   TOrder,
@@ -32,7 +38,11 @@ export type DataState = {
   orderError: string | null;
   user: TUser | null;
   userLoading: boolean;
+  userChecked: boolean;
   userError: string | null;
+  userOrders: TOrder[];
+  userOrdersLoading: boolean;
+  userOrdersError: string | null;
 };
 
 const initialState: DataState = {
@@ -53,7 +63,11 @@ const initialState: DataState = {
   orderError: null,
   user: null,
   userLoading: false,
-  userError: null
+  userChecked: false,
+  userError: null,
+  userOrders: [],
+  userOrdersLoading: false,
+  userOrdersError: null
 };
 
 export const fetchIngredients = createAsyncThunk<
@@ -116,6 +130,12 @@ export const createOrder = createAsyncThunk<
 export const fetchUser = createAsyncThunk<TUser, void, { rejectValue: string }>(
   'data/fetchUser',
   async (_, { rejectWithValue }) => {
+    const accessToken = getCookie('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!accessToken && !refreshToken) {
+      return rejectWithValue('not_authorized');
+    }
+
     try {
       const response = await getUserApi();
       return response.user;
@@ -127,6 +147,71 @@ export const fetchUser = createAsyncThunk<TUser, void, { rejectValue: string }>(
     }
   }
 );
+
+export const loginUser = createAsyncThunk<
+  TUser,
+  TLoginData,
+  { rejectValue: string }
+>('data/loginUser', async (userData, { rejectWithValue }) => {
+  try {
+    const response = await loginUserApi(userData);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    setCookie('accessToken', response.accessToken);
+    return response.user;
+  } catch (error) {
+    return rejectWithValue(
+      (error as { message?: string }).message || 'Ошибка входа'
+    );
+  }
+});
+
+export const registerUser = createAsyncThunk<
+  TUser,
+  TRegisterData,
+  { rejectValue: string }
+>('data/registerUser', async (userData, { rejectWithValue }) => {
+  try {
+    const response = await registerUserApi(userData);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    setCookie('accessToken', response.accessToken);
+    return response.user;
+  } catch (error) {
+    return rejectWithValue(
+      (error as { message?: string }).message || 'Ошибка регистрации'
+    );
+  }
+});
+
+export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
+  'data/logoutUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      await logoutApi();
+      deleteCookie('accessToken');
+      localStorage.removeItem('refreshToken');
+    } catch (error) {
+      deleteCookie('accessToken');
+      localStorage.removeItem('refreshToken');
+      return rejectWithValue(
+        (error as { message?: string }).message || 'Ошибка выхода'
+      );
+    }
+  }
+);
+
+export const fetchUserOrders = createAsyncThunk<
+  TOrder[],
+  void,
+  { rejectValue: string }
+>('data/fetchUserOrders', async (_, { rejectWithValue }) => {
+  try {
+    return await getOrdersApi();
+  } catch (error) {
+    return rejectWithValue(
+      (error as { message?: string }).message || 'Ошибка загрузки заказов'
+    );
+  }
+});
 
 export const updateUser = createAsyncThunk<
   TUser,
@@ -259,12 +344,79 @@ const dataSlice = createSlice({
       })
       .addCase(fetchUser.fulfilled, (state, action: PayloadAction<TUser>) => {
         state.userLoading = false;
+        state.userChecked = true;
         state.user = action.payload;
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.userLoading = false;
-        state.userError = action.payload || 'Ошибка загрузки пользователя';
+        state.userChecked = true;
         state.user = null;
+        if (action.payload && action.payload !== 'not_authorized') {
+          state.userError = action.payload;
+        }
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.userLoading = true;
+        state.userError = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action: PayloadAction<TUser>) => {
+        state.userLoading = false;
+        state.userChecked = true;
+        state.user = action.payload;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.userLoading = false;
+        state.userChecked = true;
+        state.userError = action.payload || 'Ошибка входа';
+        state.user = null;
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.userLoading = true;
+        state.userError = null;
+      })
+      .addCase(
+        registerUser.fulfilled,
+        (state, action: PayloadAction<TUser>) => {
+          state.userLoading = false;
+          state.userChecked = true;
+          state.user = action.payload;
+        }
+      )
+      .addCase(registerUser.rejected, (state, action) => {
+        state.userLoading = false;
+        state.userChecked = true;
+        state.userError = action.payload || 'Ошибка регистрации';
+        state.user = null;
+      })
+      .addCase(logoutUser.pending, (state) => {
+        state.userLoading = true;
+        state.userError = null;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.userLoading = false;
+        state.userChecked = true;
+        state.user = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.userLoading = false;
+        state.userChecked = true;
+        state.userError = action.payload || 'Ошибка выхода';
+        state.user = null;
+      })
+      .addCase(fetchUserOrders.pending, (state) => {
+        state.userOrdersLoading = true;
+        state.userOrdersError = null;
+      })
+      .addCase(
+        fetchUserOrders.fulfilled,
+        (state, action: PayloadAction<TOrder[]>) => {
+          state.userOrdersLoading = false;
+          state.userOrders = action.payload;
+        }
+      )
+      .addCase(fetchUserOrders.rejected, (state, action) => {
+        state.userOrdersLoading = false;
+        state.userOrdersError = action.payload || 'Ошибка загрузки заказов';
       })
       .addCase(updateUser.pending, (state) => {
         state.userLoading = true;

@@ -4,7 +4,8 @@ import {
   useNavigate,
   Location,
   Route,
-  Routes
+  Routes,
+  Navigate
 } from 'react-router-dom';
 import { AppHeader } from '../../../src/components/app-header';
 import { Modal } from '../../../src/components/modal';
@@ -26,13 +27,13 @@ import { useDispatch, useSelector } from '../../services/store';
 import {
   selectIngredients,
   selectIngredientsLoading,
-  selectIngredientsError
+  selectIngredientsError,
+  selectIsAuthenticated,
+  selectUserChecked
 } from '../../services/selectors/data';
-import { fetchIngredients } from '../../services/slices/data-slice';
+import { fetchIngredients, fetchUser } from '../../services/slices/data-slice';
 import { Preloader } from '../ui/preloader';
 import '../../index.css';
-
-const ProtectedRoute: FC<{ children: ReactNode }> = ({ children }) => children;
 
 const App = () => {
   const dispatch = useDispatch();
@@ -42,6 +43,8 @@ const App = () => {
   const isIngredientsLoading = useSelector(selectIngredientsLoading);
   const ingredients = useSelector(selectIngredients);
   const error = useSelector(selectIngredientsError);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userChecked = useSelector(selectUserChecked);
 
   const state = location.state as { background?: Location };
   const background = state?.background;
@@ -50,7 +53,17 @@ const App = () => {
 
   useEffect(() => {
     dispatch(fetchIngredients());
+    dispatch(fetchUser());
   }, [dispatch]);
+
+  const ProtectedRoute: FC<{ children: ReactNode }> = ({ children }) => {
+    if (!userChecked) return null;
+    return isAuthenticated ? (
+      <>{children}</>
+    ) : (
+      <Navigate to='/login' state={{ from: location }} replace />
+    );
+  };
 
   return (
     <div className={styles.app}>

@@ -13,6 +13,12 @@ export const selectFeedsTotalToday = (state: RootState) =>
 export const selectFeedsLoading = (state: RootState) => state.data.feedsLoading;
 export const selectFeedsError = (state: RootState) => state.data.feedsError;
 
+export const selectUserOrders = (state: RootState) => state.data.userOrders;
+export const selectUserOrdersLoading = (state: RootState) =>
+  state.data.userOrdersLoading;
+export const selectUserOrdersError = (state: RootState) =>
+  state.data.userOrdersError;
+
 export const selectConstructorItems = (state: RootState) =>
   state.data.constructorItems;
 export const selectConstructorBun = (state: RootState) =>
@@ -26,4 +32,6 @@ export const selectOrderError = (state: RootState) => state.data.orderError;
 
 export const selectUser = (state: RootState) => state.data.user;
 export const selectUserLoading = (state: RootState) => state.data.userLoading;
+export const selectUserChecked = (state: RootState) => state.data.userChecked;
+export const selectIsAuthenticated = (state: RootState) => !!state.data.user;
 export const selectUserError = (state: RootState) => state.data.userError;
