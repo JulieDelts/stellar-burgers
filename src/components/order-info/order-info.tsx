@@ -1,20 +1,41 @@
-import { FC, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { useSelector } from '../../services/store';
+import { FC, useEffect, useMemo } from 'react';
+import { useMatch, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '../../utils/types';
 import {
   selectIngredients,
   selectFeeds,
-  selectUserOrders
+  selectFeedsLoading,
+  selectUserOrders,
+  selectUserOrdersLoading
 } from '../../services/selectors/data';
+import { fetchFeeds, fetchUserOrders } from '../../services/slices/data-slice';
 
 export const OrderInfo: FC = () => {
+  const dispatch = useDispatch();
   const { number } = useParams<{ number: string }>();
   const ingredients = useSelector(selectIngredients);
   const feeds = useSelector(selectFeeds);
+  const feedsLoading = useSelector(selectFeedsLoading);
   const userOrders = useSelector(selectUserOrders);
+  const userOrdersLoading = useSelector(selectUserOrdersLoading);
+
+  const isFeedRoute = useMatch('/feed/:number');
+  const isProfileOrdersRoute = useMatch('/profile/orders/:number');
+
+  useEffect(() => {
+    if (isFeedRoute && !feeds.length && !feedsLoading) {
+      dispatch(fetchFeeds());
+    }
+  }, [dispatch, feeds.length, feedsLoading, isFeedRoute]);
+
+  useEffect(() => {
+    if (isProfileOrdersRoute && !userOrders.length && !userOrdersLoading) {
+      dispatch(fetchUserOrders());
+    }
+  }, [dispatch, isProfileOrdersRoute, userOrders.length, userOrdersLoading]);
 
   const orderData =
     userOrders.find((item) => item.number === Number(number)) ||
@@ -61,8 +82,19 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
+  const isLoading =
+    (!orderData && isFeedRoute && feedsLoading) ||
+    (!orderData && isProfileOrdersRoute && userOrdersLoading) ||
+    (!orderData && !ingredients.length);
+
+  if (isLoading) {
     return <Preloader />;
+  }
+
+  if (!orderInfo) {
+    return (
+      <div className='text text_type_main-medium pt-4'>Заказ не найден</div>
+    );
   }
 
   return <OrderInfoUI orderInfo={orderInfo} />;

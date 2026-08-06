@@ -65,6 +65,11 @@ const App = () => {
     );
   };
 
+  const UnauthenticatedRoute: FC<{ children: ReactNode }> = ({ children }) => {
+    if (!userChecked) return null;
+    return !isAuthenticated ? <>{children}</> : <Navigate to='/' replace />;
+  };
+
   return (
     <div className={styles.app}>
       <AppHeader />
@@ -72,10 +77,40 @@ const App = () => {
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='/feed/:number' element={<OrderInfo />} />
+        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        <Route
+          path='/login'
+          element={
+            <UnauthenticatedRoute>
+              <Login />
+            </UnauthenticatedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <UnauthenticatedRoute>
+              <Register />
+            </UnauthenticatedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <UnauthenticatedRoute>
+              <ForgotPassword />
+            </UnauthenticatedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <UnauthenticatedRoute>
+              <ResetPassword />
+            </UnauthenticatedRoute>
+          }
+        />
         <Route
           path='/profile'
           element={
@@ -89,6 +124,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
             </ProtectedRoute>
           }
         />
