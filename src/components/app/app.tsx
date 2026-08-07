@@ -1,11 +1,10 @@
-import { FC, ReactNode, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   useLocation,
   useNavigate,
   Location,
   Route,
-  Routes,
-  Navigate
+  Routes
 } from 'react-router-dom';
 import { AppHeader } from '../../../src/components/app-header';
 import { Modal } from '../../../src/components/modal';
@@ -27,12 +26,16 @@ import { useDispatch, useSelector } from '../../services/store';
 import {
   selectIngredients,
   selectIngredientsLoading,
-  selectIngredientsError,
+  selectIngredientsError
+} from '../../services/selectors/ingredients';
+import {
   selectIsAuthenticated,
   selectUserChecked
-} from '../../services/selectors/data';
-import { fetchIngredients, fetchUser } from '../../services/slices/data-slice';
+} from '../../services/selectors/user';
+import { fetchIngredients } from '../../services/slices/ingredients-slice';
+import { fetchUser } from '../../services/slices/user-slice';
 import { Preloader } from '../ui/preloader';
+import { ProtectedRoute, UnauthenticatedRoute } from '../route';
 import '../../index.css';
 
 const App = () => {
@@ -56,24 +59,9 @@ const App = () => {
     dispatch(fetchUser());
   }, [dispatch]);
 
-  const ProtectedRoute: FC<{ children: ReactNode }> = ({ children }) => {
-    if (!userChecked) return null;
-    return isAuthenticated ? (
-      <>{children}</>
-    ) : (
-      <Navigate to='/login' state={{ from: location }} replace />
-    );
-  };
-
-  const UnauthenticatedRoute: FC<{ children: ReactNode }> = ({ children }) => {
-    if (!userChecked) return null;
-    return !isAuthenticated ? <>{children}</> : <Navigate to='/' replace />;
-  };
-
   return (
     <div className={styles.app}>
       <AppHeader />
-
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
@@ -137,7 +125,6 @@ const App = () => {
         />
         <Route path='*' element={<NotFound404 />} />
       </Routes>
-
       {background && (
         <Routes>
           <Route

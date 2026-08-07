@@ -2,12 +2,12 @@ import { FC, useEffect } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
 import { Preloader } from '../../components/ui/preloader';
 import { FeedUI } from '../../components/ui/pages/feed/feed';
-import { fetchFeeds } from '../../services/slices/data-slice';
+import { fetchFeeds } from '../../services/slices/feed-slice';
 import {
   selectFeeds,
   selectFeedsLoading,
   selectFeedsError
-} from '../../services/selectors/data';
+} from '../../services/selectors/feed';
 
 export const Feed: FC = () => {
   const dispatch = useDispatch();

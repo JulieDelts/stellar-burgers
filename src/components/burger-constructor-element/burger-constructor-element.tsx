@@ -5,8 +5,8 @@ import { BurgerConstructorElementProps } from './type';
 import {
   moveIngredientUp,
   moveIngredientDown,
-  removeIngredientFromConstructor
-} from '../../services/slices/data-slice';
+  removeIngredient
+} from '../../services/slices/burger-constructor-slice';
 
 export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = ({
   ingredient,
@@ -24,7 +24,7 @@ export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = ({
   };
 
   const handleClose = () => {
-    dispatch(removeIngredientFromConstructor(index));
+    dispatch(removeIngredient(index));
   };
 
   return (

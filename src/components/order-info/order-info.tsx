@@ -1,17 +1,18 @@
-import { FC, useEffect, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useMatch, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient } from '../../utils/types';
+import { TIngredient, TOrder } from '../../utils/types';
 import {
-  selectIngredients,
-  selectFeeds,
-  selectFeedsLoading,
-  selectUserOrders,
-  selectUserOrdersLoading
-} from '../../services/selectors/data';
-import { fetchFeeds, fetchUserOrders } from '../../services/slices/data-slice';
+  selectUserOrdersLoading,
+  selectUserOrders
+} from '../../services/selectors/order';
+import { selectFeeds, selectFeedsLoading } from '../../services/selectors/feed';
+import { selectIngredients } from '../../services/selectors/ingredients';
+import { fetchUserOrders } from '../../services/slices/order-slice';
+import { fetchFeeds } from '../../services/slices/feed-slice';
+import { getOrderByNumberApi } from '../../utils/burger-api';
 
 export const OrderInfo: FC = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,10 @@ export const OrderInfo: FC = () => {
   const feedsLoading = useSelector(selectFeedsLoading);
   const userOrders = useSelector(selectUserOrders);
   const userOrdersLoading = useSelector(selectUserOrdersLoading);
+
+  const [singleOrder, setSingleOrder] = useState<TOrder | null>(null);
+  const [singleOrderLoading, setSingleOrderLoading] = useState(false);
+  const [singleOrderError, setSingleOrderError] = useState<string | null>(null);
 
   const isFeedRoute = useMatch('/feed/:number');
   const isProfileOrdersRoute = useMatch('/profile/orders/:number');
@@ -37,9 +42,37 @@ export const OrderInfo: FC = () => {
     }
   }, [dispatch, isProfileOrdersRoute, userOrders.length, userOrdersLoading]);
 
-  const orderData =
+  const orderFromStore =
     userOrders.find((item) => item.number === Number(number)) ||
     feeds.find((item) => item.number === Number(number));
+
+  useEffect(() => {
+    const fetchOrderByNumber = async () => {
+      if (!number || orderFromStore || singleOrder || singleOrderLoading)
+        return;
+
+      try {
+        setSingleOrderLoading(true);
+        setSingleOrderError(null);
+        const response = await getOrderByNumberApi(Number(number));
+        if (response.success && response.orders.length > 0) {
+          setSingleOrder(response.orders[0]);
+        } else {
+          setSingleOrderError('Заказ не найден');
+        }
+      } catch (error) {
+        setSingleOrderError(
+          (error as { message?: string }).message || 'Ошибка загрузки заказа'
+        );
+      } finally {
+        setSingleOrderLoading(false);
+      }
+    };
+
+    fetchOrderByNumber();
+  }, [number, orderFromStore, singleOrder, singleOrderLoading]);
+
+  const orderData = orderFromStore || singleOrder;
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
@@ -83,17 +116,26 @@ export const OrderInfo: FC = () => {
   }, [orderData, ingredients]);
 
   const isLoading =
-    (!orderData && isFeedRoute && feedsLoading) ||
-    (!orderData && isProfileOrdersRoute && userOrdersLoading) ||
-    (!orderData && !ingredients.length);
+    (!orderData &&
+      !singleOrderLoading &&
+      ((isFeedRoute && feedsLoading) ||
+        (isProfileOrdersRoute && userOrdersLoading) ||
+        (!isFeedRoute && !isProfileOrdersRoute))) ||
+    (!orderData && !singleOrder && !singleOrderError && !singleOrderLoading) ||
+    !ingredients.length;
 
-  if (isLoading) {
+  if (isLoading || singleOrderLoading) {
     return <Preloader />;
   }
 
-  if (!orderInfo) {
+  if (!orderInfo || singleOrderError) {
     return (
-      <div className='text text_type_main-medium pt-4'>Заказ не найден</div>
+      <div
+        className='text text_type_main-medium pt-4'
+        style={{ textAlign: 'center' }}
+      >
+        {singleOrderError || 'Заказ не найден'}
+      </div>
     );
   }
 

@@ -1,5 +1,9 @@
 import { FC } from 'react';
-import { Input, Button } from '@zlden/react-developer-burger-ui-components';
+import {
+  Input,
+  Button,
+  PasswordInput
+} from '@zlden/react-developer-burger-ui-components';
 import styles from '../common.module.css';
 import { Link } from 'react-router-dom';
 import { ResetPasswordUIProps } from './type';
@@ -21,9 +25,7 @@ export const ResetPasswordUI: FC<ResetPasswordUIProps> = ({
         onSubmit={handleSubmit}
       >
         <div className='pb-6'>
-          <Input
-            type='password'
-            placeholder='Новый пароль'
+          <PasswordInput
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             name='password'

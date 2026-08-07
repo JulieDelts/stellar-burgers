@@ -1,10 +1,11 @@
 import { FC, memo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from '../../services/store';
+import { v4 } from 'uuid';
 import {
-  addIngredientToConstructor,
+  addIngredient,
   setBun
-} from '../../services/slices/data-slice';
+} from '../../services/slices/burger-constructor-slice';
 import { BurgerIngredientUI } from '../ui/burger-ingredient';
 import { TBurgerIngredientProps } from './type';
 import { TConstructorIngredient } from '../../utils/types';
@@ -17,13 +18,13 @@ export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
     const handleAdd = () => {
       const constructorIngredient: TConstructorIngredient = {
         ...ingredient,
-        id: `${ingredient._id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        id: v4()
       };
 
       if (ingredient.type === 'bun') {
         dispatch(setBun(constructorIngredient));
       } else {
-        dispatch(addIngredientToConstructor(constructorIngredient));
+        dispatch(addIngredient(constructorIngredient));
       }
     };
 
