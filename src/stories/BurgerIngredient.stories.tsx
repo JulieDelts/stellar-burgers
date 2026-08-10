@@ -1,5 +1,5 @@
 import React from 'react';
-import { BurgerIngredientUI } from '@ui';
+import { BurgerIngredientUI } from '../components/ui/burger-ingredient';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {
