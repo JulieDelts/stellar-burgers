@@ -6,7 +6,7 @@ import { BurgerConstructorUI } from '../ui/burger-constructor';
 import { selectConstructorItems } from '../../services/selectors/burger-constructor';
 import {
   selectOrderRequest,
-  selectOrderModalData
+  selectOrderRequestModalData
 } from '../../services/selectors/order';
 import { selectIsAuthenticated } from '../../services/selectors/user';
 import {
@@ -21,7 +21,7 @@ export const BurgerConstructor: FC = () => {
 
   const constructorItems = useSelector(selectConstructorItems);
   const orderRequest = useSelector(selectOrderRequest);
-  const orderModalData = useSelector(selectOrderModalData);
+  const orderModalData = useSelector(selectOrderRequestModalData);
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const onOrderClick = () => {

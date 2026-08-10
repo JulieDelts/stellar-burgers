@@ -1,18 +1,24 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { useMatch, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient, TOrder } from '../../utils/types';
+import { TIngredient } from '../../utils/types';
 import {
+  selectUserOrders,
   selectUserOrdersLoading,
-  selectUserOrders
+  selectUserCurrentOrder,
+  selectUserCurrentOrderLoading,
+  selectUserCurrentOrderError,
+  selectUserOrdersError
 } from '../../services/selectors/order';
 import { selectFeeds, selectFeedsLoading } from '../../services/selectors/feed';
 import { selectIngredients } from '../../services/selectors/ingredients';
-import { fetchUserOrders } from '../../services/slices/order-slice';
+import {
+  fetchUserOrders,
+  fetchOrderByNumber
+} from '../../services/slices/order-slice';
 import { fetchFeeds } from '../../services/slices/feed-slice';
-import { getOrderByNumberApi } from '../../utils/burger-api';
 
 export const OrderInfo: FC = () => {
   const dispatch = useDispatch();
@@ -22,10 +28,10 @@ export const OrderInfo: FC = () => {
   const feedsLoading = useSelector(selectFeedsLoading);
   const userOrders = useSelector(selectUserOrders);
   const userOrdersLoading = useSelector(selectUserOrdersLoading);
-
-  const [singleOrder, setSingleOrder] = useState<TOrder | null>(null);
-  const [singleOrderLoading, setSingleOrderLoading] = useState(false);
-  const [singleOrderError, setSingleOrderError] = useState<string | null>(null);
+  const userOrdersError = useSelector(selectUserOrdersError);
+  const currentOrder = useSelector(selectUserCurrentOrder);
+  const currentOrderLoading = useSelector(selectUserCurrentOrderLoading);
+  const currentOrderError = useSelector(selectUserCurrentOrderError);
 
   const isFeedRoute = useMatch('/feed/:number');
   const isProfileOrdersRoute = useMatch('/profile/orders/:number');
@@ -47,32 +53,14 @@ export const OrderInfo: FC = () => {
     feeds.find((item) => item.number === Number(number));
 
   useEffect(() => {
-    const fetchOrderByNumber = async () => {
-      if (!number || orderFromStore || singleOrder || singleOrderLoading)
-        return;
+    if (!number) return;
 
-      try {
-        setSingleOrderLoading(true);
-        setSingleOrderError(null);
-        const response = await getOrderByNumberApi(Number(number));
-        if (response.success && response.orders.length > 0) {
-          setSingleOrder(response.orders[0]);
-        } else {
-          setSingleOrderError('Заказ не найден');
-        }
-      } catch (error) {
-        setSingleOrderError(
-          (error as { message?: string }).message || 'Ошибка загрузки заказа'
-        );
-      } finally {
-        setSingleOrderLoading(false);
-      }
-    };
+    if (currentOrderLoading || currentOrder) return;
 
-    fetchOrderByNumber();
-  }, [number, orderFromStore, singleOrder, singleOrderLoading]);
+    dispatch(fetchOrderByNumber(Number(number)));
+  }, [number, orderFromStore, currentOrder, currentOrderLoading, dispatch]);
 
-  const orderData = orderFromStore || singleOrder;
+  const orderData = orderFromStore || currentOrder;
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
@@ -116,25 +104,34 @@ export const OrderInfo: FC = () => {
   }, [orderData, ingredients]);
 
   const isLoading =
-    (!orderData &&
-      !singleOrderLoading &&
-      ((isFeedRoute && feedsLoading) ||
-        (isProfileOrdersRoute && userOrdersLoading) ||
-        (!isFeedRoute && !isProfileOrdersRoute))) ||
-    (!orderData && !singleOrder && !singleOrderError && !singleOrderLoading) ||
-    !ingredients.length;
+    !orderData &&
+    ((isFeedRoute && feedsLoading) ||
+      (isProfileOrdersRoute && userOrdersLoading) ||
+      currentOrderLoading ||
+      !ingredients.length);
 
-  if (isLoading || singleOrderLoading) {
+  if (isLoading) {
     return <Preloader />;
   }
 
-  if (!orderInfo || singleOrderError) {
+  if (userOrdersError || currentOrderError) {
     return (
       <div
         className='text text_type_main-medium pt-4'
         style={{ textAlign: 'center' }}
       >
-        {singleOrderError || 'Заказ не найден'}
+        {userOrdersError ?? currentOrderError}
+      </div>
+    );
+  }
+
+  if (!orderInfo) {
+    return (
+      <div
+        className='text text_type_main-medium pt-4'
+        style={{ textAlign: 'center' }}
+      >
+        Заказ не найден
       </div>
     );
   }
