@@ -19,85 +19,122 @@ test.describe('Добавление ингредиентов в конструк
   });
 
   test('добавление булки в конструктор', async ({ page }) => {
+    const constructor = page.getByTestId('burger-constructor');
+
     const bunsHeading = page.getByRole('heading', {
       name: 'Булки',
       exact: true
     });
 
     const bunsList = bunsHeading.locator('~ ul');
+    const firstBun = bunsList.locator('li').first();
 
     await bunsHeading.scrollIntoViewIfNeeded();
 
-    await bunsList.getByRole('button', { name: 'Добавить' }).first().click();
+    const bunName = firstBun.locator('p').last();
+    const bunNameText = (await bunName.textContent())!.trim();
 
-    await expect(page.getByText('(верх)', { exact: false })).toBeVisible();
+    await firstBun.getByRole('button', { name: 'Добавить' }).click();
 
-    await expect(page.getByText('(низ)', { exact: false })).toBeVisible();
+    await expect(
+      constructor.getByText(`${bunNameText} (верх)`, { exact: false })
+    ).toBeVisible();
+
+    await expect(
+      constructor.getByText(`${bunNameText} (низ)`, { exact: false })
+    ).toBeVisible();
   });
 
   test('добавление начинки в конструктор', async ({ page }) => {
+    const constructor = page.getByTestId('burger-constructor');
+
     const mainsHeading = page.getByRole('heading', {
       name: 'Начинки',
       exact: true
     });
 
     const mainsList = mainsHeading.locator('~ ul');
+    const firstMain = mainsList.locator('li').first();
 
     await mainsHeading.scrollIntoViewIfNeeded();
 
-    await mainsList.getByRole('button', { name: 'Добавить' }).first().click();
+    const mainName = firstMain.locator('p').last();
+    const mainNameText = (await mainName.textContent())!.trim();
+
+    await firstMain.getByRole('button', { name: 'Добавить' }).click();
 
     await expect(
-      page.getByText('Выберите начинку', { exact: true })
-    ).not.toBeVisible();
+      constructor.getByText(mainNameText, { exact: true })
+    ).toBeVisible();
   });
 
   test('добавление соуса в конструктор', async ({ page }) => {
+    const constructor = page.getByTestId('burger-constructor');
+
     const saucesHeading = page.getByRole('heading', {
       name: 'Соусы',
       exact: true
     });
 
     const saucesList = saucesHeading.locator('~ ul');
+    const firstSauce = saucesList.locator('li').first();
 
     await saucesHeading.scrollIntoViewIfNeeded();
 
-    await saucesList.getByRole('button', { name: 'Добавить' }).first().click();
+    const sauceName = firstSauce.locator('p').last();
+    const sauceNameText = (await sauceName.textContent())!.trim();
+
+    await firstSauce.getByRole('button', { name: 'Добавить' }).click();
 
     await expect(
-      page.getByText('Выберите начинку', { exact: true })
-    ).not.toBeVisible();
+      constructor.getByText(sauceNameText, { exact: true })
+    ).toBeVisible();
   });
 
   test('добавление нескольких ингредиентов разных типов', async ({ page }) => {
+    const constructor = page.getByTestId('burger-constructor');
+
     const bunsHeading = page.getByRole('heading', {
       name: 'Булки',
       exact: true
     });
 
     const bunsList = bunsHeading.locator('~ ul');
+    const firstBun = bunsList.locator('li').first();
 
     await bunsHeading.scrollIntoViewIfNeeded();
 
-    await bunsList.getByRole('button', { name: 'Добавить' }).first().click();
+    const bunName = firstBun.locator('p').last();
+    const bunNameText = (await bunName.textContent())!.trim();
 
-    await expect(page.getByText('(верх)', { exact: false })).toBeVisible();
+    await firstBun.getByRole('button', { name: 'Добавить' }).click();
 
-    await expect(page.getByText('(низ)', { exact: false })).toBeVisible();
+    await expect(
+      constructor.getByText(`${bunNameText} (верх)`, { exact: false })
+    ).toBeVisible();
+
+    await expect(
+      constructor.getByText(`${bunNameText} (низ)`, { exact: false })
+    ).toBeVisible();
+
     const mainsHeading = page.getByRole('heading', {
       name: 'Начинки',
       exact: true
     });
 
     const mainsList = mainsHeading.locator('~ ul');
+    const firstMain = mainsList.locator('li').first();
 
     await mainsHeading.scrollIntoViewIfNeeded();
 
-    await mainsList.getByRole('button', { name: 'Добавить' }).first().click();
+    const mainName = firstMain.locator('p').last();
+    const mainNameText = (await mainName.textContent())!.trim();
+
+    await firstMain.getByRole('button', { name: 'Добавить' }).click();
 
     await expect(
-      page.getByText('Выберите начинку', { exact: true })
-    ).not.toBeVisible();
+      constructor.getByText(mainNameText, { exact: true })
+    ).toBeVisible();
 
     const saucesHeading = page.getByRole('heading', {
       name: 'Соусы',
@@ -105,17 +142,17 @@ test.describe('Добавление ингредиентов в конструк
     });
 
     const saucesList = saucesHeading.locator('~ ul');
+    const firstSauce = saucesList.locator('li').first();
 
     await saucesHeading.scrollIntoViewIfNeeded();
 
-    await saucesList.getByRole('button', { name: 'Добавить' }).first().click();
+    const sauceName = firstSauce.locator('p').last();
+    const sauceNameText = (await sauceName.textContent())!.trim();
 
-    await expect(page.getByText('(верх)', { exact: false })).toBeVisible();
-
-    await expect(page.getByText('(низ)', { exact: false })).toBeVisible();
+    await firstSauce.getByRole('button', { name: 'Добавить' }).click();
 
     await expect(
-      page.getByText('Выберите начинку', { exact: true })
-    ).not.toBeVisible();
+      constructor.getByText(sauceNameText, { exact: true })
+    ).toBeVisible();
   });
 });

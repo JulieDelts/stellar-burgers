@@ -26,14 +26,9 @@ test.describe('Модальное окно ингредиента', () => {
 
     await expect(page).toHaveURL(/\/ingredients\/[^/]+$/);
 
-    await expect(
-      page
-        .getByRole('heading')
-        .filter({
-          hasText: /./
-        })
-        .last()
-    ).toBeVisible();
+    const modal = page.getByTestId('order-modal');
+
+    await expect(modal).toBeVisible();
   });
 
   test('отображение данных выбранного ингредиента в модальном окне', async ({
@@ -45,39 +40,43 @@ test.describe('Модальное окно ингредиента', () => {
       await firstIngredient.locator('p').last().textContent()
     )?.trim();
 
+    expect(ingredientName).toBeTruthy();
+
     await firstIngredient.click();
 
     await expect(page).toHaveURL(/\/ingredients\/[^/]+$/);
 
-    if (ingredientName) {
-      await expect(
-        page.getByRole('heading', {
-          name: ingredientName,
-          exact: true
-        })
-      ).toBeVisible();
-    }
+    const modal = page.getByTestId('order-modal');
+
+    await expect(modal).toBeVisible();
 
     await expect(
-      page.getByText('Калории, ккал', {
+      modal.getByRole('heading', {
+        name: ingredientName!,
         exact: true
       })
     ).toBeVisible();
 
     await expect(
-      page.getByText('Белки, г', {
+      modal.getByText('Калории, ккал', {
         exact: true
       })
     ).toBeVisible();
 
     await expect(
-      page.getByText('Жиры, г', {
+      modal.getByText('Белки, г', {
         exact: true
       })
     ).toBeVisible();
 
     await expect(
-      page.getByText('Углеводы, г', {
+      modal.getByText('Жиры, г', {
+        exact: true
+      })
+    ).toBeVisible();
+
+    await expect(
+      modal.getByText('Углеводы, г', {
         exact: true
       })
     ).toBeVisible();
@@ -90,12 +89,11 @@ test.describe('Модальное окно ингредиента', () => {
 
     await expect(page).toHaveURL(/\/ingredients\/[^/]+$/);
 
-    const closeButton = page
-      .getByRole('button')
-      .filter({
-        has: page.locator('svg')
-      })
-      .last();
+    const modal = page.getByTestId('order-modal');
+
+    await expect(modal).toBeVisible();
+
+    const closeButton = modal.getByRole('button');
 
     await expect(closeButton).toBeVisible();
 
@@ -109,6 +107,8 @@ test.describe('Модальное окно ингредиента', () => {
         exact: true
       })
     ).toBeVisible();
+
+    await expect(modal).not.toBeVisible();
   });
 
   test('закрытие модального окна по клику на оверлей', async ({ page }) => {
@@ -117,6 +117,10 @@ test.describe('Модальное окно ингредиента', () => {
     await firstIngredient.click();
 
     await expect(page).toHaveURL(/\/ingredients\/[^/]+$/);
+
+    const modal = page.getByTestId('order-modal');
+
+    await expect(modal).toBeVisible();
 
     await page.mouse.click(10, 10);
 
@@ -128,5 +132,7 @@ test.describe('Модальное окно ингредиента', () => {
         exact: true
       })
     ).toBeVisible();
+
+    await expect(modal).not.toBeVisible();
   });
 });
